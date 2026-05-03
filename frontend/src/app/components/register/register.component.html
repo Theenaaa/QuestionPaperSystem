@@ -1,0 +1,47 @@
+<div class="split-container">
+  <!-- Left Side: Illustration -->
+  <div class="illustration-side">
+    <img src="https://cdni.iconscout.com/illustration/premium/thumb/create-account-6333606-5230166.png" alt="Register Illustration" class="login-image">
+  </div>
+
+  <!-- Right Side: Register Form -->
+  <div class="form-side">
+    <div class="form-wrapper">
+      <h2>Create an Account</h2>
+      <p class="subtitle">Join as Faculty or Administrator</p>
+
+      <div *ngIf="errorMessage" class="alert error-alert">
+        {{ errorMessage }}
+      </div>
+      <div *ngIf="successMessage" class="alert success-alert">
+        {{ successMessage }}
+      </div>
+
+      <form (ngSubmit)="register()">
+        <div class="input-group">
+          <i class="fas fa-user input-icon"></i>
+          <input type="text" id="username" name="username" [(ngModel)]="user.username" placeholder="Choose a username" required>
+        </div>
+        
+        <div class="input-group">
+          <i class="fas fa-lock input-icon"></i>
+          <input type="password" id="password" name="password" [(ngModel)]="user.password" placeholder="Choose a password" required>
+        </div>
+
+        <div class="input-group">
+          <i class="fas fa-id-badge input-icon"></i>
+          <select id="role" name="role" [(ngModel)]="user.role" required class="role-select">
+            <option value="USER">Faculty (USER)</option>
+            <option value="ADMIN">Administrator (ADMIN)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-login">Register Now</button>
+      </form>
+      
+      <p class="register-text">
+        Already have an account? <a routerLink="/login">Login here</a>
+      </p>
+    </div>
+  </div>
+</div>

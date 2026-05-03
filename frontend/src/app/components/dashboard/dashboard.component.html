@@ -1,0 +1,223 @@
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>QPGen</h2>
+    </div>
+    <ul class="sidebar-menu">
+      <li *ngIf="role === 'ADMIN'" [class.active]="activeTab === 'create'" (click)="setTab('create')">
+        <i class="fas fa-edit"></i> {{ editing ? 'Edit Question' : 'Create Question' }}
+      </li>
+      <li [class.active]="activeTab === 'generate'" (click)="setTab('generate')">
+        <i class="fas fa-cogs"></i> Generate Paper
+      </li>
+      <li [class.active]="activeTab === 'manage'" (click)="setTab('manage')">
+        <i class="fas fa-list"></i> Manage Questions
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <ul>
+        <li><i class="fas fa-question-circle"></i> Help</li>
+        <li><i class="fas fa-envelope"></i> Contact Us</li>
+        <li (click)="logout()" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <div class="main-header">
+      <h1>Question Paper Generator <span class="role-badge">{{ role === 'ADMIN' ? 'Admin' : 'Faculty' }}</span></h1>
+      
+      <div class="header-actions">
+        <!-- Show Save to PDF only if a paper is generated in the generate tab -->
+        <button *ngIf="activeTab === 'generate' && generatedQuestions.length > 0" class="btn btn-primary" (click)="downloadPdf()">
+          <i class="fas fa-file-word"></i> Save to PDF
+        </button>
+
+        <!-- Show Download Selected only in manage tab if items are selected -->
+        <button *ngIf="activeTab === 'manage' && selectedIds.length > 0" class="btn btn-warning" (click)="downloadSelectedPdf()">
+          <i class="fas fa-download"></i> Download Selected PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Global Alerts -->
+    <div class="alerts-container">
+      <div *ngIf="errorMessage" class="alert error-alert">{{ errorMessage }}</div>
+      <div *ngIf="successMessage" class="alert success-alert">{{ successMessage }}</div>
+    </div>
+
+    <div *ngIf="loading" class="loading-spinner">
+      <i class="fas fa-spinner fa-spin"></i> Loading...
+    </div>
+
+    <!-- Tab Content Switcher -->
+    <div *ngIf="!loading" class="tab-content" [ngSwitch]="activeTab">
+
+      <!-- CREATE / EDIT TAB (Admin Only) -->
+      <div *ngSwitchCase="'create'" class="tab-pane">
+        <div class="card add-question-card" style="max-width: 800px; margin: 0 auto;">
+          <h3>{{ editing ? 'Edit Question' : 'Add New Question' }}</h3>
+          <div class="form-group">
+            <label>Question Text</label>
+            <input [(ngModel)]="newQuestion.text" placeholder="Enter Question Text" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Subject</label>
+              <input [(ngModel)]="newQuestion.subject" placeholder="e.g. Science" />
+            </div>
+            <div class="form-group">
+              <label>Difficulty</label>
+              <input [(ngModel)]="newQuestion.difficulty" placeholder="e.g. Hard" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Topic</label>
+              <input type="text" [(ngModel)]="newQuestion.topic" placeholder="e.g. OOP" />
+            </div>
+            <div class="form-group">
+              <label>Marks</label>
+              <input type="number" min="1" [(ngModel)]="newQuestion.marks" placeholder="e.g. 5" />
+            </div>
+          </div>
+          <div class="form-actions" style="margin-top: 20px;">
+            <button *ngIf="!editing" class="action-btn add-btn" (click)="addQuestion()">Submit Question</button>
+            <button *ngIf="editing" class="action-btn generate-btn" style="flex: 1;" (click)="updateQuestion()">Save Changes</button>
+            <button *ngIf="editing" class="action-btn reset-btn" (click)="resetForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GENERATE TAB (Mimics Screenshot Layout) -->
+      <div *ngSwitchCase="'generate'" class="tab-pane generate-pane">
+        
+        <!-- Top Toolbar -->
+        <div class="generate-toolbar">
+          <div class="toolbar-inputs">
+            <label>Subject Mode:</label>
+            <input [(ngModel)]="subject" placeholder="e.g. CS" class="toolbar-input" />
+            
+            <label style="margin-left: 15px;">Total Qs:</label>
+            <input [(ngModel)]="totalQuestions" type="number" class="toolbar-input short" />
+          </div>
+
+          <div class="toolbar-actions">
+            <button class="action-btn generate-btn" (click)="generateFlexible()"><i class="fas fa-cogs"></i> Flexible Gen</button>
+            <button class="action-btn export-btn" (click)="generateByMarks()"><i class="fas fa-star"></i> Gen By Marks</button>
+          </div>
+        </div>
+
+        <div class="preview-layout">
+          <!-- Left Panel: Options -->
+          <div class="preview-left">
+            <div class="section-box">
+              <h4>Advanced Options</h4>
+              <p style="font-size: 12px; color: #666; margin-bottom: 15px;">Targeted Difficulty Distribution</p>
+              <div class="form-group">
+                <label>Easy Target</label>
+                <input [(ngModel)]="easy" type="number" placeholder="Optional" />
+              </div>
+              <div class="form-group">
+                <label>Medium Target</label>
+                <input [(ngModel)]="medium" type="number" placeholder="Optional" />
+              </div>
+              <div class="form-group">
+                <label>Hard Target</label>
+                <input [(ngModel)]="hard" type="number" placeholder="Optional" />
+              </div>
+              <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ddd;">
+              <div class="form-group">
+                <label>Total Target Marks</label>
+                <input [(ngModel)]="totalMarks" type="number" placeholder="(For Gen By Marks)" />
+              </div>
+            </div>
+            
+            <div class="section-box mt-3" *ngIf="subject">
+              <h4>Loaded Context</h4>
+              <p style="font-size: 13px; color: #555; margin-bottom: 5px;">Active Subject: <strong style="color: #3498db;">{{subject | uppercase}}</strong></p>
+              <p style="font-size: 13px; color: #555;">Available Bank Size: <strong>{{ questions.length }}</strong></p>
+            </div>
+          </div>
+
+          <!-- Right Panel: Paper Preview Window -->
+          <div class="preview-right">
+            <h4 style="margin-bottom: 10px; color: #333;">Generated Paper Preview</h4>
+            <div class="paper-box">
+              
+              <div *ngIf="generatedQuestions.length === 0" class="empty-paper">
+                <i class="fas fa-file-alt" style="font-size: 40px; color: #ddd; margin-bottom: 15px;"></i>
+                <p>No paper generated yet.</p>
+                <p style="font-size: 13px;">Use the toolbar above to generate.</p>
+              </div>
+
+              <div *ngIf="generatedQuestions.length > 0">
+                <h3 class="paper-title">{{ subject | uppercase }} EXAM</h3>
+                
+                <div *ngFor="let q of generatedQuestions; let i = index" class="paper-q">
+                  <div class="q-text"><strong>Q{{ i+1 }}.</strong> {{ q.text }}</div>
+                  <div class="q-meta">
+                     <span style="float: right; color: #e74c3c;">[{{ q.marks }} marks]</span>
+                     <span class="bt-tag">Diff: {{ q.difficulty }}</span>
+                     <span class="bt-tag" style="margin-left: 15px;">Topic: {{ q.topic }}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANAGE / LIST TAB -->
+      <div *ngSwitchCase="'manage'" class="tab-pane">
+        
+        <div class="search-toolbar">
+          <input [(ngModel)]="searchSubject" placeholder="Filter by Subject..." class="toolbar-input" />
+          <input [(ngModel)]="searchDifficulty" placeholder="Filter by Difficulty..." class="toolbar-input" />
+          <button class="action-btn search-btn" (click)="search()"><i class="fas fa-search"></i> Search</button>
+          <button class="action-btn reset-btn" (click)="resetSearch()">Reset</button>
+
+          <button *ngIf="selectedIds.length > 0" (click)="generateSelected()" class="action-btn generate-btn" style="margin-left: auto;">
+            Generate Selected ({{ selectedIds.length }})
+          </button>
+        </div>
+
+        <div class="card list-card" style="padding: 0; border-radius: 6px; overflow: hidden;">
+          <ul class="question-list">
+            <li *ngFor="let q of questions" class="question-card">
+              <label class="custom-checkbox">
+                <input type="checkbox" [value]="q.id" (change)="onSelect(q.id, $event)">
+                <span class="checkmark"></span>
+              </label>
+              
+              <div class="question-content">
+                <div class="question-text">{{ q.text }}</div>
+                <div class="question-meta">
+                  <span class="badge subject"><i class="fas fa-book"></i> {{ q.subject }}</span>
+                  <span class="badge difficulty" [ngClass]="q.difficulty ? q.difficulty.toLowerCase() : ''"><i class="fas fa-signal"></i> {{ q.difficulty }}</span>
+                  <span class="badge topic-badge"><i class="fas fa-tag"></i> {{ q.topic }}</span>
+                  <span class="badge marks-badge"><i class="fas fa-star"></i> {{ q.marks }} Marks</span>
+                </div>
+              </div>
+
+              <div class="list-actions" *ngIf="role === 'ADMIN'">
+                <button class="action-btn btn-edit" (click)="editQuestion(q)"><i class="fas fa-edit"></i> Edit</button>
+                <button class="action-btn btn-delete" (click)="deleteQuestion(q.id)"><i class="fas fa-trash"></i> Delete</button>
+              </div>
+            </li>
+          </ul>
+          <div *ngIf="questions.length === 0" class="empty-state">
+            <i class="fas fa-folder-open" style="font-size: 30px; margin-bottom: 10px;"></i><br>
+            No questions found in database.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>

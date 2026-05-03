@@ -1,0 +1,148 @@
+/* Global host wrap */
+:host {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: white; 
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.split-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: white;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Left Panel */
+.illustration-side {
+  flex: 1;
+  background-color: #eef3fc; /* Light blue panel */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-image {
+  max-width: 80%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+/* Right Panel */
+.form-side {
+  flex: 1;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: white;
+}
+
+.form-wrapper {
+  width: 100%;
+  max-width: 420px; /* Keep form contained on massive screens */
+}
+
+.form-wrapper h2 {
+  font-size: 26px;
+  color: #1a237e;
+  margin-bottom: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.subtitle {
+  color: #757575;
+  font-size: 12px;
+  margin-bottom: 35px;
+  text-align: center;
+}
+
+/* Inputs */
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #9e9e9e;
+  font-size: 14px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #333;
+  outline: none;
+  transition: all 0.3s;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  border-color: #3f51b5;
+  box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.1);
+}
+
+.trouble-text {
+  font-size: 11px;
+  color: #9e9e9e;
+  text-align: left;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+/* Button */
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background-color: #283593; /* Dark blue button */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-login:hover {
+  background-color: #1a237e;
+}
+
+/* Register */
+.register-text {
+  margin-top: 25px;
+  font-size: 12px;
+  text-align: center;
+  color: #757575;
+}
+
+.register-text a {
+  color: #3f51b5;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.register-text a:hover {
+  text-decoration: underline;
+}
