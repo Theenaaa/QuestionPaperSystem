@@ -1,27 +1,10 @@
-# Stage 1: Build the application
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
-
-# Copy the pom.xml and download dependencies (cached layer)
-COPY pom.xml .
-RUN mvn dependency:go-offline
-
-# Copy the source code and build the application
-COPY src ./src
+COPY . .
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the application
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-
-# Copy only the built JAR from the build stage
-# Note: Ensure the JAR name matches your pom.xml artifactId
 COPY --from=build /app/target/*.jar app.jar
-
-# Render requires the application to listen on a port provided by the environment
-# We use the PORT environment variable passed by Render
 EXPOSE 8080
-
-# Command to run the application
-# We pass the server.port property to override the default (usually 8080)
 ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
