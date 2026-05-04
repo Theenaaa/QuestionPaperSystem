@@ -1,4 +1,3 @@
-# Use lightweight Java 17 image
 FROM openjdk:17-jdk-slim
 
 # Set working directory
