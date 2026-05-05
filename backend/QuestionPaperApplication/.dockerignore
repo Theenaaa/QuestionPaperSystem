@@ -1,5 +1,5 @@
 # Ignore build files
-QuestionPaperApplication/target/
+target/
 
 # Git files
 .git
