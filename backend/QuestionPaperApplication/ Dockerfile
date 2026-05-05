@@ -1,23 +1,17 @@
-# Stage 1: Build the application
+# Stage 1: Build
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
 
-# Since Render's Root Directory is set to backend/QuestionPaperApplication,
-# everything is already in the current directory.
-COPY . .
+# We use the full path from the GitHub root
+COPY backend/QuestionPaperApplication/pom.xml .
+COPY backend/QuestionPaperApplication/src ./src
 
-# Build the JAR
 RUN mvn clean package -DskipTests
 
-# Stage 2: Run the application
+# Stage 2: Runtime
 FROM openjdk:17-jdk-slim
 WORKDIR /app
-
-# Copy the built JAR from the target folder
 COPY --from=build /app/target/*.jar app.jar
 
-# Render assigns a port via the PORT environment variable
 EXPOSE 8080
-
-# Run the application
 ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
