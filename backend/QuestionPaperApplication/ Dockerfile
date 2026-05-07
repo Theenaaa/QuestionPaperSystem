@@ -1,17 +1,13 @@
 # Stage 1: Build
 FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
-
-# We use the full path from the GitHub root
-COPY backend/QuestionPaperApplication/pom.xml .
-COPY backend/QuestionPaperApplication/src ./src
-
+COPY . .
 RUN mvn clean package -DskipTests
 
 # Stage 2: Runtime
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-
 EXPOSE 8080
-ENTRYPOINT ["java", "-Dserver.port=${PORT}", "-jar", "app.jar"]
+
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar app.jar"]
